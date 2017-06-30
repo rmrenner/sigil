@@ -22,7 +22,10 @@ Sigil is a Parenscript to Javascript command line compiler and REPL.
 Usage
 -----
 
-    sigil [-i] [-I load-directory] [--eval <CL code>] [--pseval <PS Code>] app.ps > app.js
+    sigil [-i] [-v] [-I load-directory] [--eval <CL code>] [--pseval <PS Code>] app.ps > app.js
+    
+- `-i` starts the parenscript REPL.
+- `-v` enables verbose mode. Each parenscript form will appear as a comment before its javascript representation.
 
 Installation
 ------------
