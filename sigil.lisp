@@ -1,6 +1,7 @@
 (require :parenscript)
 
 (defparameter *include-paths* ())
+(defparameter *verbose* nil)
 
 ;; add 'load' to parenscript compiler
 (ps:defpsmacro load (file)
@@ -26,8 +27,11 @@
   (do
    ((form (read f nil) (read f nil)))
    ((not form))
-    (format t  "/* ~A */~%" form)
-    (format t "~A~%" (ps:ps* form))))
+    (when *verbose*
+      (format t  "/* ~A */~%~%" form))
+    (let ((js-output (format nil "~A~%~%" (ps:ps* form))))
+      (when (some #'alphanumericp js-output)
+	(format t js-output)))))
 
 (defmacro while (test &body body)
   `(loop
@@ -65,6 +69,10 @@
   (if (cdr argv)
       (progn
         (pop argv)
+	;;; check for verbose flag
+	(when (member "-v" argv :test #'string=)
+	  (setf *verbose* t)
+	  (setf argv (remove "-v" argv :test #'string=)))
         (while argv
           (let ((arg (pop argv)))
             (cond 
@@ -74,12 +82,14 @@
               ((string= arg "-i") (repl))
               ((string= arg "--eval")
                (let ((code (pop argv)))
-                 (format t "/* --eval ~A~% */" (read-from-string code))
+                 (when *verbose*
+		   (format t "/* --eval ~A~% */" (read-from-string code)))
                  (in-package :ps)
                  (eval (read-from-string code))))
               ((string= arg "--pseval")
                (let ((code (pop argv)))
-                 (format t "/* --pseval ~A~% */" (read-from-string code))
+                 (when *verbose*
+		   (format t "/* --pseval ~A~% */" (read-from-string code)))
                  (ps:ps* (read-from-string code))))
               (t
                (let ((probe-results (probe-file arg)))
